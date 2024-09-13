@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ureca.user.model.dao.UserDAO">
- 
-  <insert id="insert" parameterType="User">
+
+  <!-- INSERT 구문에서 user_id는 자동 증가 값이므로 지정하지 않음 -->
+  <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="user_id">
      INSERT INTO User (name, class_id, email, password, profile_picture)
     VALUES (#{name}, #{class_id}, #{email}, #{password}, #{profile_picture})
-   </insert>
-  
+  </insert>
+
+  <!-- UPDATE 구문 수정: user_id는 변경 불가능하므로 다른 필드를 수정 -->
   <update id="update" parameterType="User">
-     update user set id=#{id}, password=#{password} where id=#{id}
+    UPDATE User
+    SET name=#{name}, password=#{password}, profile_picture=#{profile_picture}, class_id=#{class_id}
+    WHERE user_id=#{user_id}
   </update>
-  
-  <delete id="delete" parameterType="String">
-     delete from user where id=#{id}
+
+  <!-- DELETE 구문에서 user_id가 INT 타입임을 반영 -->
+  <delete id="delete" parameterType="int">
+    DELETE FROM User WHERE user_id=#{user_id}
   </delete>
-  
+
+  <!-- 로그인 시 이메일과 비밀번호만 조회 -->
   <select id="login" parameterType="User" resultType="User">
-  	select id,password from user
-  	where id = #{id} and password = #{password}
+    SELECT user_id, name, email, password, profile_picture, class_id
+    FROM User
+    WHERE email = #{email} AND password = #{password}
   </select>
-  
-  <select id="select" parameterType="String" 
-          resultType="User">
-     SELECT user_id, name, email, password, profile_picture, class_id
-        FROM User
-        WHERE user_id = #{userId};
+
+  <!-- 특정 사용자 정보 조회 -->
+  <select id="select" parameterType="int" resultType="User">
+    SELECT user_id, name, email, password, profile_picture, class_id
+    FROM User
+    WHERE user_id = #{userId}
   </select>
-   
+
+  <!-- 전체 사용자 조회 -->
   <select id="selectAll" resultType="User">
-     select user_id, name, email, password, profile_picture, class_id from User order by id desc
+    SELECT user_id, name, email, password, profile_picture, class_id
+    FROM User
+    ORDER BY user_id DESC
   </select>
 
 </mapper>
-
-
-
-
-
-
-
-
-
-

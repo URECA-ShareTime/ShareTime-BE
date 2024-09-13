@@ -2,19 +2,19 @@
 package com.ureca.user.dto;
 
 public class User {
-    private String user_id;
+    private Integer user_id;
     private String name;
-    private Integer class_id;
+    private int class_id;
     private String email;
     private String password;
     private String profile_picture; // 필드 정의
 
     // Getters and Setters
-    public String getUser_id() {
+    public Integer getUser_id() {
         return user_id;
     }
-
-    public void setUser_id(String user_id) {
+    
+    public void setUser_id(Integer user_id) {
         this.user_id = user_id;
     }
 
@@ -26,11 +26,11 @@ public class User {
         this.name = name;
     }
 
-    public Integer getClass_id() {
+    public int getClass_id() {
         return class_id;
     }
 
-    public void setClass_id(Integer class_id) {
+    public void setClass_id(int class_id) {
         this.class_id = class_id;
     }
 

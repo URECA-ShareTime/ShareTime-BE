@@ -7,7 +7,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +33,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String register(User user, Model model) {
+    public String register(@ModelAttribute User user, Model model) {
         System.out.println("POST /register - 회원가입 요청: user=" + user);
         if ( user.getPassword() == null) {
             System.out.println("회원가입 실패 - 아이디와 비밀번호가 입력되지 않음");
@@ -44,8 +46,8 @@ public class UserController {
             System.out.println("회원가입 성공: user=" + user);
             return "redirect:/user/login";
         } catch (DataIntegrityViolationException e) {
-            System.out.println("회원가입 실패 - 중복 ID 사용: " + e.getMessage());
-            model.addAttribute("error", "이미 사용중인 ID입니다. 다른 ID를 사용해 주세요.");
+            System.out.println("회원가입 실패 - 중복 EMAIL 사용: " + e.getMessage());
+            model.addAttribute("error", "이미 사용중인 Email입니다. 다른 Email를 사용해 주세요.");
             return "register";
         } catch (SQLException e) {
             System.out.println("DB 에러 발생: " + e.getMessage());
