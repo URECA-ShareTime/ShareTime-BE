@@ -1,7 +1,18 @@
 // src/main/java/com/ureca/user/dto/User.java
 package com.ureca.user.dto;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "user")
 public class User {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	
     private Integer user_id;
     private String name;
     private int class_id;

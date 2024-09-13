@@ -1,30 +1,35 @@
 package com.ureca.user.controller;
 
-import java.sql.SQLException;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.ureca.user.util.FileUploadUtil;
 import com.ureca.user.dto.User;
 import com.ureca.user.model.service.UserService;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
-@Controller
 @RequestMapping("/user")
 public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    @Autowired
+    private FileUploadUtil fileUploadUtil;
 
     @GetMapping("/register")
     public String registerForm() {
@@ -33,32 +38,100 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String register(@ModelAttribute User user, Model model) {
-        System.out.println("POST /register - 회원가입 요청: user=" + user);
-        if ( user.getPassword() == null) {
-            System.out.println("회원가입 실패 - 아이디와 비밀번호가 입력되지 않음");
-            model.addAttribute("error", "아이디와 비밀번호에 한 글자 이상 입력해주세요.");
-            return "register";
+    public ResponseEntity<String> register(
+            @RequestParam("name") String name,
+            @RequestParam("class_id") int classId,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam(value = "profileimg", required = false) MultipartFile profileImg) {
+
+        // profileImg가 null이 아니고 비어있지 않은 경우에만 출력
+        if (profileImg != null && !profileImg.isEmpty()) {
+            System.out.println("업로드된 파일: " + profileImg.getOriginalFilename());
+            System.out.println("파일 크기: " + profileImg.getSize());
+            System.out.println("파일 유형: " + profileImg.getContentType());
+        } else {
+            System.out.println("프로필 이미지가 업로드되지 않았거나 비어 있습니다.");
         }
+        
+        System.out.println("POST /register - 회원가입 요청: name=" + name + ", email=" + email);
+       
+
+        // 파일 저장 경로 설정
+        String imagePath = null;
+        if (profileImg != null && !profileImg.isEmpty()) {
+            String fileName = System.currentTimeMillis() + "_" + profileImg.getOriginalFilename();
+            System.out.println("파일 저장 시도: 파일명=" + fileName + ", 파일 크기=" + profileImg.getSize());
+
+            try {
+                // 절대 경로 여부 확인
+                if (!Paths.get(uploadDir).isAbsolute()) {
+                    System.out.println("설정된 경로가 절대 경로가 아닙니다: " + uploadDir);
+                    return ResponseEntity.status(500).body("업로드 디렉토리가 절대 경로로 설정되지 않았습니다.");
+                }
+                
+                // 명확한 절대 경로 설정 확인
+                File uploadDirectory = new File(uploadDir);
+                System.out.println("현재 업로드 디렉토리 경로: " + uploadDir);
+
+                // 디렉토리가 존재하지 않으면 생성
+                if (!uploadDirectory.exists()) {
+                    System.out.println("업로드 디렉토리가 존재하지 않아 생성합니다: " + uploadDir);
+                    boolean created = uploadDirectory.mkdirs();
+                    if (created) {
+                        System.out.println("업로드 디렉토리 생성 성공: " + uploadDir);
+                    } else {
+                        System.out.println("업로드 디렉토리 생성 실패: " + uploadDir);
+                        return ResponseEntity.status(500).body("파일 저장 디렉토리 생성에 실패했습니다.");
+                    }
+                }
+
+                // 디렉토리 권한 체크
+                if (!Files.isWritable(Paths.get(uploadDir))) {
+                    System.out.println("업로드 디렉토리에 쓰기 권한이 없습니다: " + uploadDir);
+                    return ResponseEntity.status(500).body("업로드 디렉토리에 쓰기 권한이 없습니다.");
+                }
+
+                // 절대 경로를 사용하여 파일 저장 시도
+                File dest = new File(uploadDirectory, fileName);
+                System.out.println("저장할 파일의 절대 경로: " + dest.getAbsolutePath());
+                
+                profileImg.transferTo(dest);
+                imagePath = dest.getAbsolutePath(); // 저장된 파일의 절대 경로를 사용하여 DB에 저장
+                System.out.println("파일 저장 성공: 저장 경로=" + imagePath);
+            } catch (IOException e) {
+                System.out.println("프로필 이미지 저장 실패: " + e.getMessage());
+                e.printStackTrace(); // 예외의 전체 스택 트레이스를 출력하여 원인을 확인
+                return ResponseEntity.status(500).body("프로필 이미지 저장에 실패했습니다. 에러 메시지: " + e.getMessage());
+            }
+        } else {
+            System.out.println("프로필 이미지가 업로드되지 않았거나 비어 있습니다.");
+        }
+
+        // 유저 정보 설정
+        User user = new User();
+        user.setName(name);
+        user.setClass_id(classId);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setProfile_picture(imagePath);
 
         try {
             userService.insert(user);
             System.out.println("회원가입 성공: user=" + user);
-            return "redirect:/user/login";
+            return ResponseEntity.ok("회원가입이 성공적으로 완료되었습니다.");
         } catch (DataIntegrityViolationException e) {
             System.out.println("회원가입 실패 - 중복 EMAIL 사용: " + e.getMessage());
-            model.addAttribute("error", "이미 사용중인 Email입니다. 다른 Email를 사용해 주세요.");
-            return "register";
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("이미 사용중인 Email입니다. 다른 Email를 사용해 주세요.");
         } catch (SQLException e) {
             System.out.println("DB 에러 발생: " + e.getMessage());
-            e.printStackTrace();  // 전체 예외 스택 트레이스 출력
-            model.addAttribute("error", "DB 오류가 발생했습니다. 다시 시도해 주세요.");
-            return "register";
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("DB 오류가 발생했습니다. 다시 시도해 주세요.");
         } catch (Exception e) {
             System.out.println("알 수 없는 오류 발생: " + e.getMessage());
-            e.printStackTrace();  // 전체 예외 스택 트레이스 출력
-            model.addAttribute("error", "알 수 없는 오류가 발생했습니다.");
-            return "register";
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("알 수 없는 오류가 발생했습니다.");
         }
     }
 
@@ -69,33 +142,30 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(User user, HttpSession session, Model model) throws SQLException {
+    public ResponseEntity<String> login(@RequestBody User user, HttpSession session) {
         System.out.println("POST /login - 로그인 요청: user=" + user);
         try {
             User result = userService.login(user);
             if (result != null) {
                 System.out.println("로그인 성공: user=" + result);
                 session.setAttribute("id", result.getUser_id());
-                return "redirect:/task/list";
+                return ResponseEntity.ok("로그인 성공");
             } else {
                 System.out.println("로그인 실패 - 아이디 혹은 비밀번호가 틀렸습니다.");
-                model.addAttribute("error", "아이디 혹은 비밀번호가 틀렸습니다. 다시 입력해주세요.");
-                return "login";
+                return ResponseEntity.badRequest().body("아이디 혹은 비밀번호가 틀렸습니다. 다시 입력해주세요.");
             }
         } catch (DataIntegrityViolationException e) {
             System.out.println("로그인 실패 - 데이터 무결성 위반: " + e.getMessage());
-            model.addAttribute("error", "아이디와 비밀번호에 한 글자 이상 입력해주세요");
-            return "login";
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("아이디와 비밀번호에 한 글자 이상 입력해주세요");
         } catch (SQLException e) {
             System.out.println("DB 에러 발생: " + e.getMessage());
-            e.printStackTrace();  // 전체 예외 스택 트레이스 출력
-            model.addAttribute("error", "DB 에러가 발생했습니다.");
-            return "login";
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("DB 에러가 발생했습니다.");
         } catch (Exception e) {
             System.out.println("알 수 없는 오류 발생: " + e.getMessage());
-            e.printStackTrace();  // 전체 예외 스택 트레이스 출력
-            model.addAttribute("error", "알 수 없는 오류가 발생했습니다.");
-            return "login";
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("알 수 없는 오류가 발생했습니다.");
         }
     }
 }

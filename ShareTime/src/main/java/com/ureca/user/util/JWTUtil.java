@@ -1,4 +1,4 @@
-package com.ureca.util;
+package com.ureca.user.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
