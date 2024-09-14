@@ -14,6 +14,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	UserDAO dao;
+	
 
 	@Override
 	public int insert(User user) throws SQLException {

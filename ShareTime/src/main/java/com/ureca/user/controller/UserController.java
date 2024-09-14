@@ -1,3 +1,4 @@
+
 package com.ureca.user.controller;
 
 import com.ureca.user.util.FileUploadUtil;
@@ -8,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Paths; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,9 +122,15 @@ public class UserController {
             System.out.println("회원가입 성공: user=" + user);
             return ResponseEntity.ok("회원가입이 성공적으로 완료되었습니다.");
         } catch (DataIntegrityViolationException e) {
-            System.out.println("회원가입 실패 - 중복 EMAIL 사용: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("이미 사용중인 Email입니다. 다른 Email를 사용해 주세요.");
+            // 이메일 중복에 대한 예외 처리
+            String rootMessage = e.getRootCause() != null ? e.getRootCause().getMessage() : e.getMessage();
+            System.out.println("회원가입 실패 - 데이터 무결성 위반: " + rootMessage);
+
+            if (rootMessage.contains("email")) {
+                return ResponseEntity.badRequest().body("이미 사용중인 메일입니다.");
+            } else {
+                return ResponseEntity.badRequest().body("입력한 정보에 문제가 있습니다.");
+            }
         } catch (SQLException e) {
             System.out.println("DB 에러 발생: " + e.getMessage());
             e.printStackTrace();
