@@ -21,9 +21,16 @@ public class StudyServiceImpl implements StudyService {
         return studyDAO.validateStudyKey(study_name, study_key);
     }
 
-    // Study 객체를 받도록 수정
     @Override
     public void createStudy(Study study) {
         studyDAO.createStudy(study);
+    }
+
+    @Override
+    public void addUserToStudy(int user_id, String study_name) {
+        Study study = studyDAO.getStudyByName(study_name);
+        if (study != null) {
+            studyDAO.insertUserStudy(user_id, study.getStudy_id());
+        }
     }
 }

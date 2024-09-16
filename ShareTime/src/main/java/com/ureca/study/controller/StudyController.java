@@ -52,11 +52,13 @@ public class StudyController {
     public Map<String, String> joinOrCreateStudy(@RequestBody Map<String, String> request) {
         String study_name = request.get("study_name");
         String study_key = request.get("study_key");
+        int user_id = Integer.parseInt(request.get("user_id")); // 사용자 ID를 받도록 추가
 
         Map<String, String> response = new HashMap<>();
         if (studyService.studyExists(study_name)) {
             boolean isValid = studyService.validateStudyKey(study_name, study_key);
             if (isValid) {
+                studyService.addUserToStudy(user_id, study_name); // 스터디에 사용자 추가
                 response.put("message", "JOIN_SUCCESS");
             } else {
                 response.put("message", "INVALID_KEY");
@@ -66,6 +68,7 @@ public class StudyController {
             study.setStudy_name(study_name);
             study.setStudy_key(study_key);
             studyService.createStudy(study);
+            studyService.addUserToStudy(user_id, study_name); // 새로운 스터디에 사용자 추가
             response.put("message", "CREATED");
         }
 

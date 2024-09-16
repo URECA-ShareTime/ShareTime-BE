@@ -7,6 +7,7 @@ public interface StudyService {
 
     boolean validateStudyKey(String study_name, String study_key);
 
-    // Study 객체를 받도록 수정
     void createStudy(Study study);
+
+    void addUserToStudy(int user_id, String study_name); // 추가된 메서드
 }

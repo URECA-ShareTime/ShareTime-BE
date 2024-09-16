@@ -16,4 +16,16 @@
     <select id="validateStudyKey" resultType="boolean" parameterType="map">
         SELECT COUNT(*) > 0 FROM Study WHERE study_name = #{study_name} AND study_key = #{study_key}
     </select>
+    
+    <!-- 스터디 이름으로 스터디 조회 -->
+<select id="getStudyByName" parameterType="string" resultType="Study">
+    SELECT * FROM Study WHERE study_name = #{study_name}
+</select>
+
+<!-- UserStudy에 사용자와 스터디 연결 삽입 -->
+<insert id="insertUserStudy" parameterType="map">
+    INSERT INTO UserStudy (user_id, study_id)
+    VALUES (#{user_id}, #{study_id})
+</insert>
+
 </mapper>

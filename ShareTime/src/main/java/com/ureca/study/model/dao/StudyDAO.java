@@ -1,12 +1,11 @@
 package com.ureca.study.model.dao;
 
 import com.ureca.study.dto.Study;
-
-import java.util.HashMap;
-
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
 
 @Repository
 public class StudyDAO {
@@ -29,5 +28,16 @@ public class StudyDAO {
 
     public void createStudy(Study study) {
         sqlSession.insert(NAMESPACE + "createStudy", study);
+    }
+
+    public Study getStudyByName(String study_name) {
+        return sqlSession.selectOne(NAMESPACE + "getStudyByName", study_name);
+    }
+
+    public void insertUserStudy(int user_id, int study_id) {
+        var params = new HashMap<String, Object>();
+        params.put("user_id", user_id);
+        params.put("study_id", study_id);
+        sqlSession.insert(NAMESPACE + "insertUserStudy", params);
     }
 }
