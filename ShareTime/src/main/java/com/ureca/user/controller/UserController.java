@@ -1,14 +1,18 @@
+
 package com.ureca.user.controller;
 
 import com.ureca.user.util.FileUploadUtil;
+import com.ureca.user.util.JwtUtil;
 import com.ureca.user.dto.User;
 import com.ureca.user.model.service.UserService;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Paths; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +28,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -121,9 +128,15 @@ public class UserController {
             System.out.println("회원가입 성공: user=" + user);
             return ResponseEntity.ok("회원가입이 성공적으로 완료되었습니다.");
         } catch (DataIntegrityViolationException e) {
-            System.out.println("회원가입 실패 - 중복 EMAIL 사용: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("이미 사용중인 Email입니다. 다른 Email를 사용해 주세요.");
+            // 이메일 중복에 대한 예외 처리
+            String rootMessage = e.getRootCause() != null ? e.getRootCause().getMessage() : e.getMessage();
+            System.out.println("회원가입 실패 - 데이터 무결성 위반: " + rootMessage);
+
+            if (rootMessage.contains("email")) {
+                return ResponseEntity.badRequest().body("이미 사용중인 메일입니다.");
+            } else {
+                return ResponseEntity.badRequest().body("입력한 정보에 문제가 있습니다.");
+            }
         } catch (SQLException e) {
             System.out.println("DB 에러 발생: " + e.getMessage());
             e.printStackTrace();
@@ -141,31 +154,43 @@ public class UserController {
         return "login";
     }
 
+ // src/main/java/com/ureca/user/controller/UserController.java
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user, HttpSession session) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody User user, HttpSession session) {
         System.out.println("POST /login - 로그인 요청: user=" + user);
+        Map<String, String> response = new HashMap<>();
         try {
             User result = userService.login(user);
             if (result != null) {
                 System.out.println("로그인 성공: user=" + result);
-                session.setAttribute("id", result.getUser_id());
-                return ResponseEntity.ok("로그인 성공");
+
+                // JWT 토큰 생성 전 로그 추가
+                System.out.println("Generating JWT tokens for user: " + result);
+
+                // JWT 토큰 생성
+                String accessToken = jwtUtil.generateAccessToken(result);
+                String refreshToken = jwtUtil.generateRefreshToken(result);
+
+                // 응답에 토큰 포함
+                response.put("message", "로그인 성공");
+                response.put("accessToken", accessToken);
+                response.put("refreshToken", refreshToken);
+
+                return ResponseEntity.ok(response);
             } else {
                 System.out.println("로그인 실패 - 아이디 혹은 비밀번호가 틀렸습니다.");
-                return ResponseEntity.badRequest().body("아이디 혹은 비밀번호가 틀렸습니다. 다시 입력해주세요.");
+                response.put("message", "아이디 혹은 비밀번호가 틀렸습니다. 다시 입력해주세요.");
+                return ResponseEntity.badRequest().body(response);
             }
-        } catch (DataIntegrityViolationException e) {
-            System.out.println("로그인 실패 - 데이터 무결성 위반: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("아이디와 비밀번호에 한 글자 이상 입력해주세요");
         } catch (SQLException e) {
             System.out.println("DB 에러 발생: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body("DB 에러가 발생했습니다.");
+            return ResponseEntity.status(500).body(Map.of("message", "DB 에러가 발생했습니다."));
         } catch (Exception e) {
+            // 알 수 없는 오류 발생 시의 로그
             System.out.println("알 수 없는 오류 발생: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body("알 수 없는 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(Map.of("message", "알 수 없는 오류가 발생했습니다."));
         }
     }
 }

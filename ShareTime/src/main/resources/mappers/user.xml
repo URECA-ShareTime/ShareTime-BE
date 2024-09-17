@@ -4,14 +4,24 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ureca.user.model.dao.UserDAO">
 
+  <!-- 사용자 조회 결과를 명시적으로 매핑 -->
+  <resultMap id="UserResultMap" type="com.ureca.user.dto.User">
+    <id property="user_id" column="user_id" />
+    <result property="name" column="name" />
+    <result property="class_id" column="class_id" />
+    <result property="email" column="email" />
+    <result property="password" column="password" />
+    <result property="profile_picture" column="profile_picture" />
+  </resultMap>
+
   <!-- INSERT 구문에서 user_id는 자동 증가 값이므로 지정하지 않음 -->
-  <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="user_id">
-     INSERT INTO User (name, class_id, email, password, profile_picture)
+  <insert id="insert" parameterType="com.ureca.user.dto.User" useGeneratedKeys="true" keyProperty="user_id">
+    INSERT INTO User (name, class_id, email, password, profile_picture)
     VALUES (#{name}, #{class_id}, #{email}, #{password}, #{profile_picture})
   </insert>
 
   <!-- UPDATE 구문 수정: user_id는 변경 불가능하므로 다른 필드를 수정 -->
-  <update id="update" parameterType="User">
+  <update id="update" parameterType="com.ureca.user.dto.User">
     UPDATE User
     SET name=#{name}, password=#{password}, profile_picture=#{profile_picture}, class_id=#{class_id}
     WHERE user_id=#{user_id}
@@ -23,21 +33,21 @@
   </delete>
 
   <!-- 로그인 시 이메일과 비밀번호만 조회 -->
-  <select id="login" parameterType="User" resultType="User">
+  <select id="login" parameterType="com.ureca.user.dto.User" resultMap="UserResultMap">
     SELECT user_id, name, email, password, profile_picture, class_id
     FROM User
     WHERE email = #{email} AND password = #{password}
   </select>
 
   <!-- 특정 사용자 정보 조회 -->
-  <select id="select" parameterType="int" resultType="User">
+  <select id="select" parameterType="int" resultMap="UserResultMap">
     SELECT user_id, name, email, password, profile_picture, class_id
     FROM User
-    WHERE user_id = #{userId}
+    WHERE user_id = #{user_id}
   </select>
 
   <!-- 전체 사용자 조회 -->
-  <select id="selectAll" resultType="User">
+  <select id="selectAll" resultMap="UserResultMap">
     SELECT user_id, name, email, password, profile_picture, class_id
     FROM User
     ORDER BY user_id DESC

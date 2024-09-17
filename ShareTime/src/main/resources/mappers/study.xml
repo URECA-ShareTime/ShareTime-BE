@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ureca.study.model.dao.StudyDAO">
+
+    <select id="studyExists" resultType="boolean" parameterType="string">
+        SELECT COUNT(*) > 0 FROM Study WHERE study_name = #{study_name}
+    </select>
+
+    <insert id="createStudy" parameterType="Study" useGeneratedKeys="true" keyProperty="study_id">
+        INSERT INTO Study (study_name, study_key)
+        VALUES (#{study_name}, #{study_key})
+    </insert>
+
+    <select id="validateStudyKey" resultType="boolean" parameterType="map">
+        SELECT COUNT(*) > 0 FROM Study WHERE study_name = #{study_name} AND study_key = #{study_key}
+    </select>
+    
+    <!-- 스터디 이름으로 스터디 조회 -->
+<select id="getStudyByName" parameterType="string" resultType="Study">
+    SELECT * FROM Study WHERE study_name = #{study_name}
+</select>
+
+<!-- UserStudy에 사용자와 스터디 연결 삽입 -->
+<insert id="insertUserStudy" parameterType="map">
+    INSERT INTO UserStudy (user_id, study_id)
+    VALUES (#{user_id}, #{study_id})
+</insert>
+
+</mapper>
