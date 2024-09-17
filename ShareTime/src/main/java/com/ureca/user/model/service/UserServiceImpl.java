@@ -33,11 +33,16 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User login(User user) throws SQLException {
-		User loginResult = dao.login(user);
-		if (loginResult != null) {
-			return loginResult;
-		}
-		return null;
+	    System.out.println("로그인 요청 파라미터: " + user);
+	    User loginResult = dao.login(user);
+	    if (loginResult != null) {
+	        System.out.println("DB에서 조회된 로그인 결과: " + loginResult);
+	        if (loginResult.getUser_id() == null) {
+	            System.out.println("user_id가 null로 설정되었습니다. DB 매핑을 확인하세요.");
+	        }
+	        return loginResult;
+	    }
+	    return null;
 	}
 
 	@Override
