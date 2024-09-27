@@ -4,6 +4,15 @@
 
 <mapper namespace="com.ureca.study.model.dao.StudyDAO">
 
+    <!-- Study 객체 매핑을 명확하게 정의 -->
+    <resultMap id="StudyResultMap" type="com.ureca.study.dto.Study">
+        <id property="study_id" column="study_id"/>
+        <result property="study_name" column="study_name"/>
+        <result property="study_key" column="study_key"/>
+        <result property="created_at" column="created_at"/>
+        <result property="updated_at" column="updated_at"/>
+    </resultMap>
+
     <select id="studyExists" resultType="boolean" parameterType="string">
         SELECT COUNT(*) > 0 FROM Study WHERE study_name = #{study_name}
     </select>
@@ -16,16 +25,25 @@
     <select id="validateStudyKey" resultType="boolean" parameterType="map">
         SELECT COUNT(*) > 0 FROM Study WHERE study_name = #{study_name} AND study_key = #{study_key}
     </select>
-    
-    <!-- 스터디 이름으로 스터디 조회 -->
-<select id="getStudyByName" parameterType="string" resultType="Study">
-    SELECT * FROM Study WHERE study_name = #{study_name}
-</select>
 
-<!-- UserStudy에 사용자와 스터디 연결 삽입 -->
-<insert id="insertUserStudy" parameterType="map">
-    INSERT INTO UserStudy (user_id, study_id)
-    VALUES (#{user_id}, #{study_id})
-</insert>
+    <!-- Study 객체를 정확히 매핑하기 위해 resultMap 사용 -->
+    <select id="getStudyByName" parameterType="string" resultMap="StudyResultMap">
+        SELECT * 
+        FROM Study 
+        WHERE LOWER(TRIM(study_name)) = LOWER(TRIM(#{study_name}))
+    </select>
+
+    <!-- UserStudy에 사용자와 스터디 연결 삽입 -->
+    <insert id="insertUserStudy" parameterType="map">
+        INSERT INTO UserStudy (user_id, study_id)
+        VALUES (#{user_id}, #{study_id})
+    </insert>
+    
+        <!-- 사용자가 특정 스터디에 참여했는지 확인 -->
+    <select id="isUserInStudy" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM UserStudy
+        WHERE user_id = #{user_id} AND study_id = #{study_id}
+    </select>
 
 </mapper>
