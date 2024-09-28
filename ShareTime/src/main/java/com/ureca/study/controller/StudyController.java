@@ -16,6 +16,9 @@ public class StudyController {
 
     @Autowired
     private StudyService studyService;
+    
+    @Autowired
+    private JwtUtil jwtUtil; // JwtUtil 주입
 
     @Autowired
     private JwtUtil jwtUtil; // JwtUtil 주입
@@ -52,17 +55,27 @@ public class StudyController {
         return response;
     }
 
+<<<<<<< Updated upstream
+=======
+ // StudyController.java
+
+>>>>>>> Stashed changes
     @PostMapping("/joinOrCreate")
     public Map<String, String> joinOrCreateStudy(
             @RequestBody Map<String, String> request,
             @RequestHeader("Authorization") String token) {
 
         Map<String, String> response = new HashMap<>();
+<<<<<<< Updated upstream
         String study_name = request.get("study_name");
         String study_key = request.get("study_key");
 
         System.out.println("Received study_name: " + study_name + ", study_key: " + study_key);
 
+=======
+
+        // JWT 토큰에서 user_id 추출
+>>>>>>> Stashed changes
         String extractedToken = token.replace("Bearer ", "");
         Integer user_id;
         try {
@@ -77,10 +90,17 @@ public class StudyController {
             return response;
         }
 
+<<<<<<< Updated upstream
+=======
+        String study_name = request.get("study_name");
+        String study_key = request.get("study_key");
+
+>>>>>>> Stashed changes
         try {
             if (studyService.studyExists(study_name)) {
                 boolean isValid = studyService.validateStudyKey(study_name, study_key);
                 if (isValid) {
+<<<<<<< Updated upstream
                     try {
                         studyService.addUserToStudy(user_id, study_name);
                         response.put("message", "JOIN_SUCCESS");
@@ -88,6 +108,10 @@ public class StudyController {
                         response.put("message", "ALREADY_JOINED");
                         response.put("error", e.getMessage());
                     }
+=======
+                    studyService.addUserToStudy(user_id, study_name); // 스터디에 사용자 추가
+                    response.put("message", "JOIN_SUCCESS");
+>>>>>>> Stashed changes
                 } else {
                     response.put("message", "INVALID_KEY");
                 }
@@ -96,13 +120,20 @@ public class StudyController {
                 study.setStudy_name(study_name);
                 study.setStudy_key(study_key);
                 studyService.createStudy(study);
+<<<<<<< Updated upstream
                 studyService.addUserToStudy(user_id, study_name);
+=======
+                studyService.addUserToStudy(user_id, study_name); // 새로운 스터디에 사용자 추가
+>>>>>>> Stashed changes
                 response.put("message", "CREATED");
             }
         } catch (Exception e) {
             response.put("message", "ERROR");
             response.put("error", e.getMessage());
+<<<<<<< Updated upstream
             e.printStackTrace();
+=======
+>>>>>>> Stashed changes
         }
 
         return response;

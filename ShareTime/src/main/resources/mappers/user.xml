@@ -52,5 +52,11 @@
     FROM User
     ORDER BY user_id DESC
   </select>
+  
+  <select id="getUserById" parameterType="int" resultType="com.ureca.user.dto.User">
+    SELECT user_id, name, email, password, profile_picture, class_id 
+    FROM User 
+    WHERE user_id = #{user_id, jdbcType=INTEGER}
+</select>
 
 </mapper>

@@ -1,4 +1,3 @@
-
 package com.ureca.user.controller;
 
 import com.ureca.user.util.FileUploadUtil;
@@ -191,6 +190,111 @@ public class UserController {
             System.out.println("알 수 없는 오류 발생: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("message", "알 수 없는 오류가 발생했습니다."));
+        }
+    }
+ // 프로필 이미지 수정 API 추가
+    @PutMapping("/updateProfileImage")
+    public ResponseEntity<String> updateProfileImage(
+            @RequestParam("profileImage") MultipartFile profileImage,
+            @RequestHeader("Authorization") String token) {
+        // JWT 토큰에서 user_id 추출
+        String extractedToken = token.replace("Bearer ", "");
+        Integer user_id;
+        try {
+            user_id = jwtUtil.extractUserId(extractedToken);
+            if (user_id == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+        }
+
+        // 프로필 이미지 업로드
+        String imagePath = null;
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
+            File uploadDirectory = new File(uploadDir);
+            if (!uploadDirectory.exists()) uploadDirectory.mkdirs();
+
+            File dest = new File(uploadDirectory, fileName);
+            try {
+                profileImage.transferTo(dest);
+                imagePath = dest.getAbsolutePath();
+            } catch (IOException e) {
+                return ResponseEntity.status(500).body("Failed to upload profile image.");
+            }
+        }
+
+        // 사용자 프로필 업데이트
+        try {
+            User user = userService.select(user_id); // 수정된 부분: int 타입으로 변경
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found.");
+            }
+            user.setProfile_picture(imagePath);
+            userService.update(user);
+            return ResponseEntity.ok("Profile image updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating profile image.");
+        }
+    }
+
+    // 비밀번호 수정 API 추가
+    @PutMapping("/updatePassword")
+    public ResponseEntity<String> updatePassword(
+            @RequestBody Map<String, String> request,
+            @RequestHeader("Authorization") String token) {
+        // JWT 토큰에서 user_id 추출
+        String extractedToken = token.replace("Bearer ", "");
+        Integer user_id;
+        try {
+            user_id = jwtUtil.extractUserId(extractedToken);
+            if (user_id == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+        }
+
+        String newPassword = request.get("password");
+        try {
+            User user = userService.select(user_id); // 수정된 부분: int 타입으로 변경
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found.");
+            }
+            user.setPassword(newPassword);
+            userService.update(user);
+            return ResponseEntity.ok("Password updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating password.");
+        }
+    }
+    
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.replace("Bearer ", "");
+            Integer userId = jwtUtil.extractUserId(extractedToken);
+
+            if (userId == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+
+            User user = userService.select(userId); // String 타입에서 int 타입으로 변경
+
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found.");
+            }
+
+            return ResponseEntity.ok(user);
+        } catch (SQLException e) {
+            System.err.println("Database error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Database error occurred.");
+        } catch (Exception e) {
+            System.err.println("Error retrieving user info: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error.");
         }
     }
 }
