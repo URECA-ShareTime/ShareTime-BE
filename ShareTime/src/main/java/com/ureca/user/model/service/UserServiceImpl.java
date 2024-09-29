@@ -48,4 +48,14 @@ public class UserServiceImpl implements UserService {
     public List<User> selectAll() throws SQLException {
         return dao.selectAll();
     }
+    
+    @Override
+    public List<User> selectUsersByClassId(int classId) throws SQLException {
+        return dao.selectUsersByClassId(classId);
+    }
+    
+    @Override
+    public List<String> getStudyListByUserId(int userId) throws SQLException {
+        return dao.selectStudyListByUserId(userId);
+    }
 }

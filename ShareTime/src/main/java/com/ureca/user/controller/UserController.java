@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.nio.file.Files;
 import java.nio.file.Paths; 
@@ -33,6 +34,9 @@ public class UserController {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+    
+    // 서버 URL을 직접 설정
+    private String serverUrl = "http://localhost:8080";
 
     @Autowired
     private FileUploadUtil fileUploadUtil;
@@ -192,12 +196,10 @@ public class UserController {
             return ResponseEntity.status(500).body(Map.of("message", "알 수 없는 오류가 발생했습니다."));
         }
     }
- // 프로필 이미지 수정 API 추가
     @PutMapping("/updateProfileImage")
     public ResponseEntity<String> updateProfileImage(
-            @RequestParam("profileImage") MultipartFile profileImage,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
             @RequestHeader("Authorization") String token) {
-        // JWT 토큰에서 user_id 추출
         String extractedToken = token.replace("Bearer ", "");
         Integer user_id;
         try {
@@ -209,7 +211,7 @@ public class UserController {
             return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
         }
 
-        // 프로필 이미지 업로드
+        // 프로필 이미지 업로드 처리
         String imagePath = null;
         if (profileImage != null && !profileImage.isEmpty()) {
             String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
@@ -219,26 +221,34 @@ public class UserController {
             File dest = new File(uploadDirectory, fileName);
             try {
                 profileImage.transferTo(dest);
-                imagePath = dest.getAbsolutePath();
+                // 클라이언트가 접근할 수 있는 URL로 설정 (DB에 저장할 때는 상대 경로로 저장)
+                imagePath = "/images/" + fileName;
+                System.out.println("Image Uploaded to: " + imagePath); // 이미지 저장 경로 출력
             } catch (IOException e) {
+                System.out.println("Failed to upload profile image: " + e.getMessage());
                 return ResponseEntity.status(500).body("Failed to upload profile image.");
             }
+        } else {
+            // 기본 이미지로 변경 요청이 들어온 경우
+            imagePath = "/images/default.png";
+            System.out.println("Default Image Set: " + imagePath); // 기본 이미지 경로 출력
         }
 
         // 사용자 프로필 업데이트
         try {
-            User user = userService.select(user_id); // 수정된 부분: int 타입으로 변경
+            User user = userService.select(user_id);
             if (user == null) {
                 return ResponseEntity.status(404).body("User not found.");
             }
             user.setProfile_picture(imagePath);
             userService.update(user);
+            System.out.println("Profile Image Updated in DB: " + imagePath); // DB에 저장된 이미지 경로 출력
             return ResponseEntity.ok("Profile image updated successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error updating profile image.");
         }
     }
-
+    
     // 비밀번호 수정 API 추가
     @PutMapping("/updatePassword")
     public ResponseEntity<String> updatePassword(
@@ -297,4 +307,65 @@ public class UserController {
             return ResponseEntity.status(500).body("Internal server error.");
         }
     }
+    
+    // 사용자가 속한 클래스의 멤버들을 조회하는 API
+    @GetMapping("/class-members")
+    public ResponseEntity<?> getClassMembers(@RequestHeader("Authorization") String token) {
+        try {
+            // JWT 토큰에서 사용자 아이디 추출
+            String extractedToken = token.replace("Bearer ", "");
+            Integer userId = jwtUtil.extractUserId(extractedToken);
+
+            if (userId == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+
+            // 현재 사용자의 class_id를 가져오기 위해 사용자 정보를 조회
+            User user = userService.select(userId);
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found.");
+            }
+
+            // 해당 클래스에 속한 사용자 리스트 조회
+            List<User> classUsers = userService.selectUsersByClassId(user.getClass_id());
+
+            return ResponseEntity.ok(classUsers);
+        } catch (SQLException e) {
+            System.err.println("Database error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Database error occurred.");
+        } catch (Exception e) {
+            System.err.println("Error retrieving class members: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error.");
+        }
+    }
+    
+ // 사용자가 참여 중인 스터디 리스트를 반환하는 API 추가
+    @GetMapping("/study-list")
+    public ResponseEntity<?> getStudyList(@RequestHeader("Authorization") String token) {
+        try {
+            // JWT 토큰에서 사용자 ID 추출
+            String extractedToken = token.replace("Bearer ", "");
+            Integer userId = jwtUtil.extractUserId(extractedToken);
+
+            if (userId == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+
+            // 사용자 정보를 통해 사용자가 참여 중인 스터디 리스트를 조회
+            List<String> studyList = userService.getStudyListByUserId(userId); // 사용자가 참여 중인 스터디 리스트 조회 메서드
+
+            if (studyList == null || studyList.isEmpty()) {
+                return ResponseEntity.status(404).body("No studies found for the user.");
+            }
+
+            return ResponseEntity.ok(studyList);
+        } catch (Exception e) {
+            System.err.println("Error retrieving study list: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error.");
+        }
+    }
 }
+
