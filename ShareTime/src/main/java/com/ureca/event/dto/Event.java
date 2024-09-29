@@ -1,6 +1,7 @@
 package com.ureca.event.dto;
 
 import java.sql.Date;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,12 +18,16 @@ public class Event {
 	private Integer event_id;
 	private String title;
 	private String description;
-	private Date start_date;
-	private Date end_date;
-	private String group_type;
-	private Integer class_id;
-	private Integer study_id;
+	private Date start_time;
+	private Date end_time;
+	private List<String> group_type;
+	private List<Integer> class_id;
+	private List<Integer> study_id;
 	private Integer creator_id;
+	
+	private String groupTypeString;
+	private String classIdString;
+	private String studyIdString;
 
 	// Getters and Setters
 	public Integer getEvent_id() {
@@ -49,43 +54,43 @@ public class Event {
 		this.description = description;
 	}
 
-	public Date getStart_date() {
-		return start_date;
+	public Date getStart_time() {
+		return start_time;
 	}
 
-	public void setStart_date(Date start_date) {
-		this.start_date = start_date;
+	public void setStart_time(Date start_time) {
+		this.start_time = start_time;
 	}
 
-	public Date getEnd_date() {
-		return end_date;
+	public Date getEnd_time() {
+		return end_time;
 	}
 
-	public void setEnd_date(Date end_date) {
-		this.end_date = end_date;
+	public void setEnd_time(Date end_time) {
+		this.end_time = end_time;
 	}
 
-	public String getGroup_type() {
+	public List<String> getGroup_type() {
 		return group_type;
 	}
 
-	public void setGroup_type(String group_type) {
+	public void setGroup_type(List<String> group_type) {
 		this.group_type = group_type;
 	}
 
-	public Integer getClass_id() {
+	public List<Integer> getClass_id() {
 		return class_id;
 	}
 
-	public void setClass_id(Integer class_id) {
+	public void setClass_id(List<Integer> class_id) {
 		this.class_id = class_id;
 	}
 
-	public Integer getStudy_id() {
+	public List<Integer> getStudy_id() {
 		return study_id;
 	}
 
-	public void setStudy_id(Integer study_id) {
+	public void setStudy_id(List<Integer> study_id) {
 		this.study_id = study_id;
 	}
 
@@ -97,14 +102,38 @@ public class Event {
 		this.creator_id = creator_id;
 	}
 
+	public String getGroupTypeString() {
+		return groupTypeString;
+	}
+
+	public void setGroupTypeString(String groupTypeString) {
+		this.groupTypeString = groupTypeString;
+	}
+
+	public String getClassIdString() {
+		return classIdString;
+	}
+
+	public void setClassIdString(String classIdString) {
+		this.classIdString = classIdString;
+	}
+
+	public String getStudyIdString() {
+		return studyIdString;
+	}
+
+	public void setStudyIdString(String studyIdString) {
+		this.studyIdString = studyIdString;
+	}
+
 	@Override
 	public String toString() {
 		return "Event{" +
 				"event_id='" + event_id + '\'' +
 				", title='" + title + '\'' +
 				", description='" + description + '\'' +
-				", start_date='" + start_date + '\'' +
-				", end_date='" + end_date + '\'' +
+				", start_time='" + start_time + '\'' +
+				", end_time='" + end_time + '\'' +
 				", group_type='" + group_type + '\'' +
 				", class_id='" + class_id + '\'' +
 				", study_id='" + study_id + '\'' +
