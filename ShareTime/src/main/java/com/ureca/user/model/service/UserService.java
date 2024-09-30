@@ -2,6 +2,7 @@ package com.ureca.user.model.service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import com.ureca.user.dto.User;
 
@@ -23,5 +24,9 @@ public interface UserService {
     List<User> selectUsersByClassId(int classId) throws SQLException;
     
  // 사용자가 참여 중인 스터디 리스트를 조회하는 메서드 추가
-    List<String> getStudyListByUserId(int userId) throws SQLException;
+    List<Map<String, Object>> getStudyListByUserId(int userId) throws SQLException;
+    
+ // 스터디 ID로 사용자 목록 조회
+    List<User> selectUsersByStudyId(int studyId) throws SQLException;
+    
 }

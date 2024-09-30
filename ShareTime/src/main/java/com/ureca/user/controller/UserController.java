@@ -157,7 +157,6 @@ public class UserController {
         return "login";
     }
 
- // src/main/java/com/ureca/user/controller/UserController.java
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody User user, HttpSession session) {
         System.out.println("POST /login - 로그인 요청: user=" + user);
@@ -345,7 +344,6 @@ public class UserController {
     @GetMapping("/study-list")
     public ResponseEntity<?> getStudyList(@RequestHeader("Authorization") String token) {
         try {
-            // JWT 토큰에서 사용자 ID 추출
             String extractedToken = token.replace("Bearer ", "");
             Integer userId = jwtUtil.extractUserId(extractedToken);
 
@@ -353,8 +351,7 @@ public class UserController {
                 return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
             }
 
-            // 사용자 정보를 통해 사용자가 참여 중인 스터디 리스트를 조회
-            List<String> studyList = userService.getStudyListByUserId(userId); // 사용자가 참여 중인 스터디 리스트 조회 메서드
+            List<Map<String, Object>> studyList = userService.getStudyListByUserId(userId);
 
             if (studyList == null || studyList.isEmpty()) {
                 return ResponseEntity.status(404).body("No studies found for the user.");
@@ -363,6 +360,31 @@ public class UserController {
             return ResponseEntity.ok(studyList);
         } catch (Exception e) {
             System.err.println("Error retrieving study list: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error.");
+        }
+    }
+    
+ // 각 스터디의 멤버들을 조회하는 API
+    @GetMapping("/study-members/{studyId}")
+    public ResponseEntity<?> getStudyMembers(@PathVariable("studyId") int studyId, @RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.replace("Bearer ", "");
+            Integer userId = jwtUtil.extractUserId(extractedToken);
+
+            if (userId == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+
+            List<User> studyMembers = userService.selectUsersByStudyId(studyId);
+
+            if (studyMembers == null || studyMembers.isEmpty()) {
+                return ResponseEntity.status(404).body("No members found for this study.");
+            }
+
+            return ResponseEntity.ok(studyMembers);
+        } catch (Exception e) {
+            System.err.println("Error retrieving study members: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error.");
         }

@@ -2,6 +2,7 @@ package com.ureca.user.model.service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,12 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public List<String> getStudyListByUserId(int userId) throws SQLException {
+    public List<Map<String, Object>> getStudyListByUserId(int userId) throws SQLException {
         return dao.selectStudyListByUserId(userId);
+    }
+    
+    @Override
+    public List<User> selectUsersByStudyId(int studyId) throws SQLException {
+        return dao.selectUsersByStudyId(studyId);
     }
 }

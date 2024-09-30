@@ -2,6 +2,7 @@ package com.ureca.user.model.dao;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -27,5 +28,8 @@ public interface UserDAO {
     List<User> selectUsersByClassId(@Param("class_id") int classId) throws SQLException;
     
  // 사용자가 참여 중인 스터디 리스트를 조회하는 메서드
-    List<String> selectStudyListByUserId(@Param("user_id") int userId) throws SQLException;
-}
+    List<Map<String, Object>> selectStudyListByUserId(@Param("user_id") int userId) throws SQLException;
+    
+    // 스터디 ID로 사용자 목록을 조회하는 메서드
+    List<User> selectUsersByStudyId(@Param("study_id") int studyId) throws SQLException;
+   }
