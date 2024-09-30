@@ -38,6 +38,25 @@
     ORDER BY event_id DESC
 </select>
 
+<select id="selectAllEventByClassId" parameterType="int" resultMap="EventResultMap">
+	SELECT event_id, title, description, start_time, end_time, group_type, class_id, study_id, creator_id
+	FROM Event
+	WHERE group_type LIKE '%class%' AND class_id=#{class_id}
+</select>
+
+<select id="selectAllEventByStudyList" parameterType="list" resultMap="EventResultMap">
+    SELECT event_id, title, description, start_time, end_time, group_type, class_id, study_id, creator_id
+    FROM Event
+    WHERE group_type LIKE '%study%'
+    <if test="stringList != null and stringList.size() > 0">
+        AND (
+            <foreach item="id" collection="stringList" separator=" OR ">
+                FIND_IN_SET(#{id}, study_id)
+            </foreach>
+        )
+    </if>
+</select>
+
 <update id="update" parameterType="com.ureca.event.dto.Event">
     UPDATE Event
     SET title=#{title}, 
