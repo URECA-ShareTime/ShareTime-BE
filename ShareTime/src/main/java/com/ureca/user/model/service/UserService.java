@@ -18,4 +18,10 @@ public interface UserService {
     public User select(int id) throws SQLException; // String에서 int로 수정
 
     public List<User> selectAll() throws SQLException;
+    
+    // 클래스 멤버 조회 메서드 추가
+    List<User> selectUsersByClassId(int classId) throws SQLException;
+    
+ // 사용자가 참여 중인 스터디 리스트를 조회하는 메서드 추가
+    List<String> getStudyListByUserId(int userId) throws SQLException;
 }

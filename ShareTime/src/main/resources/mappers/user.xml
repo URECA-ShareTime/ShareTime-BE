@@ -59,4 +59,18 @@
     WHERE user_id = #{user_id, jdbcType=INTEGER}
 </select>
 
+    <!-- 클래스 아이디로 사용자 조회 -->
+    <select id="selectUsersByClassId" parameterType="int" resultMap="UserResultMap">
+        SELECT user_id, name, email, password, profile_picture, class_id
+        FROM User
+        WHERE class_id = #{class_id}
+    </select>
+
+<!-- 사용자가 참여 중인 스터디 리스트를 조회하는 SQL 쿼리 -->
+<select id="selectStudyListByUserId" parameterType="int" resultType="map">
+    SELECT s.study_id, s.study_name
+    FROM Study s
+    JOIN UserStudy us ON s.study_id = us.study_id
+    WHERE us.user_id = #{user_id}
+</select>
 </mapper>

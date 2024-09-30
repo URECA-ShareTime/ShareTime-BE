@@ -13,6 +13,7 @@ public class StudyController {
     private StudyService studyService;
     @Autowired
     private JwtUtil jwtUtil; // JwtUtil 주입
+
     @PostMapping("/checkExistence")
     public Map<String, String> checkExistence(@RequestBody Map<String, String> request) {
         String study_name = request.get("study_name");
@@ -37,6 +38,7 @@ public class StudyController {
         response.put("message", "스터디가 생성되었습니다.");
         return response;
     }
+
     @PostMapping("/joinOrCreate")
     public Map<String, String> joinOrCreateStudy(
             @RequestBody Map<String, String> request,
@@ -45,6 +47,7 @@ public class StudyController {
         String study_name = request.get("study_name");
         String study_key = request.get("study_key");
         System.out.println("Received study_name: " + study_name + ", study_key: " + study_key);
+
         String extractedToken = token.replace("Bearer ", "");
         Integer user_id;
         try {
@@ -58,6 +61,7 @@ public class StudyController {
             response.put("error", e.getMessage());
             return response;
         }
+
         try {
             if (studyService.studyExists(study_name)) {
                 boolean isValid = studyService.validateStudyKey(study_name, study_key);
