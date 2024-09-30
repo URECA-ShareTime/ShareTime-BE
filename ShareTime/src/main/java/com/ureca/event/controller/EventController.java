@@ -6,9 +6,12 @@ import com.ureca.event.model.service.EventService;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.nio.file.Files;
@@ -40,8 +43,8 @@ public class EventController {
         Event newEvent = new Event();
         newEvent.setTitle(event.getTitle());
         newEvent.setDescription(event.getDescription());
-        newEvent.setStart_date(event.getStart_date());
-        newEvent.setEnd_date(event.getEnd_date());
+        newEvent.setStart_time(event.getStart_time());
+        newEvent.setEnd_time(event.getEnd_time());
         newEvent.setGroup_type(event.getGroup_type());
         newEvent.setClass_id(event.getClass_id());
         newEvent.setStudy_id(event.getStudy_id());
@@ -69,7 +72,7 @@ public class EventController {
     }
 
     // 모든 Events 조회
-    @GetMapping
+    @GetMapping("/events")
     public ResponseEntity<List<Event>> selectAllEvent() throws SQLException {
         System.out.println("GET /events");
         List<Event> events = eventService.selectAll();
@@ -78,9 +81,10 @@ public class EventController {
 
     // 기존 Event 업데이트
     @PutMapping("/events/{event_id}")
-    public ResponseEntity<Event> updateEvent(@PathVariable Integer event_id, @RequestBody Event event) throws SQLException {
+    public ResponseEntity<Event> updateEvent(@PathVariable("event_id") Integer event_id, @RequestBody Event event) throws SQLException {
         System.out.println("PUT /events/" + event_id);
-        int updatedEvent = eventService.update(event);
+        int eid = event_id;
+        int updatedEvent = eventService.update(event, eid);
         if (updatedEvent > 0) {
             System.out.println("Event updated");
             return new ResponseEntity<>(HttpStatus.OK);
@@ -92,9 +96,10 @@ public class EventController {
 
     // 특정 Event 삭제
     @DeleteMapping("/events/{event_id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Integer event_id) throws SQLException {
+    public ResponseEntity<Void> deleteEvent(@PathVariable("event_id") Integer event_id) throws SQLException {
         System.out.println("DELETE /events/" + event_id);
-        int isDeleted = eventService.delete(event_id);
+        int eid = event_id;
+        int isDeleted = eventService.delete(eid);
         if (isDeleted > 0) {
             System.out.println("Event deleted");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -11,15 +11,19 @@
     <result property="description" column="description" />
     <result property="start_time" column="start_time" />
     <result property="end_time" column="end_time" />
-    <result property="group_type" column="group_type" />
-    <result property="class_id" column="class_id" />
-    <result property="study_id" column="study_id" />
+    <result property="groupTypeString" column="group_type" />
+    <result property="classIdString" column="class_id" />
+    <result property="studyIdString" column="study_id" />
     <result property="creator_id" column="creator_id" />
 </resultMap>
 
 <insert id="insert" parameterType="com.ureca.event.dto.Event" useGeneratedKeys="true" keyProperty="event_id">
     INSERT INTO Event (title, description, start_time, end_time, group_type, class_id, study_id, creator_id)
-    VALUES (#{title}, #{description}, #{start_time}, #{end_time}, #{group_type}, #{class_id}, #{study_id}, #{creator_id})
+    VALUES (#{title}, #{description}, #{start_time}, #{end_time}, 
+    		#{groupTypeString}, 
+    		#{classIdString}, 
+    		#{studyIdString}, 
+    		#{creator_id})
 </insert>
 
 <select id="select" parameterType="int" resultMap="EventResultMap">
@@ -40,9 +44,9 @@
         description=#{description}, 
         start_time=#{start_time}, 
         end_time=#{end_time}, 
-        group_type=#{group_type}, 
-        class_id=#{class_id}, 
-        study_id=#{study_id} 
+        group_type=#{groupTypeString}, 
+        class_id=#{classIdString},
+        study_id=#{studyIdString}
     WHERE event_id=#{event_id}
 </update>
 
