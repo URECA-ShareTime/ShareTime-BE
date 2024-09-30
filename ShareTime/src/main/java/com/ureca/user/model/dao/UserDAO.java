@@ -12,7 +12,6 @@ import com.ureca.user.dto.User;
 @Mapper
 public interface UserDAO {
 
-
 	public int insert(User user);  // 회원가입 처리
 
 	public int update(User user) throws SQLException;

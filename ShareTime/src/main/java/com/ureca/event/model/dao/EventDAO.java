@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.ureca.event.dto.Event;
-import com.ureca.user.dto.User;
 
 @Mapper
 public interface EventDAO {

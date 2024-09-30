@@ -8,7 +8,7 @@ import com.ureca.event.dto.Event;
 public interface EventService {
 	public Event insert(Event event) throws SQLException;  
 
-	public int update(Event event) throws SQLException;
+	public int update(Event event, int event_id) throws SQLException;
 
 	public int delete(int id) throws SQLException;
 
