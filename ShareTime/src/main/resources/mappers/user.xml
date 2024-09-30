@@ -73,4 +73,12 @@
     JOIN UserStudy us ON s.study_id = us.study_id
     WHERE us.user_id = #{user_id}
 </select>
+
+  <!-- 스터디 ID로 사용자 목록 조회 -->
+  <select id="selectUsersByStudyId" parameterType="int" resultMap="UserResultMap">
+    SELECT u.user_id, u.name, u.class_id, u.email, u.password, u.profile_picture
+    FROM User u
+    JOIN UserStudy us ON u.user_id = us.user_id
+    WHERE us.study_id = #{study_id}
+  </select>
 </mapper>
