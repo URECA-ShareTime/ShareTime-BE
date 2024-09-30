@@ -64,4 +64,9 @@ public class UserServiceImpl implements UserService {
     public List<User> selectUsersByStudyId(int studyId) throws SQLException {
         return dao.selectUsersByStudyId(studyId);
     }
+    
+    @Override
+    public List<User> selectAllUsers() throws SQLException {
+        return dao.selectAllUsers(); // DAO를 통해 모든 유저를 조회
+    }
 }

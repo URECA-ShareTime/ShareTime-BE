@@ -389,5 +389,29 @@ public class UserController {
             return ResponseEntity.status(500).body("Internal server error.");
         }
     }
+    
+    // 모든 유저를 조회하는 API
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllUsers(@RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.replace("Bearer ", "");
+            Integer userId = jwtUtil.extractUserId(extractedToken);
+
+            if (userId == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+
+            List<User> users = userService.selectAllUsers(); // 모든 유저 리스트 조회
+            if (users == null || users.isEmpty()) {
+                return ResponseEntity.status(404).body("No users found.");
+            }
+
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            System.err.println("Error retrieving users: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error.");
+        }
+    }
 }
 
