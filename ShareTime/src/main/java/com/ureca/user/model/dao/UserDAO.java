@@ -32,4 +32,7 @@ public interface UserDAO {
     
     // 스터디 ID로 사용자 목록을 조회하는 메서드
     List<User> selectUsersByStudyId(@Param("study_id") int studyId) throws SQLException;
+    
+    List<User> selectAllUsers() throws SQLException; // 모든 유저 조회 쿼리
+
    }

@@ -29,4 +29,6 @@ public interface UserService {
  // 스터디 ID로 사용자 목록 조회
     List<User> selectUsersByStudyId(int studyId) throws SQLException;
     
+    List<User> selectAllUsers() throws SQLException; // 모든 유저 조회 메서드
+
 }

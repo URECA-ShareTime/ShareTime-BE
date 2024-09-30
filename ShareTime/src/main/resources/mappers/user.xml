@@ -81,4 +81,11 @@
     JOIN UserStudy us ON u.user_id = us.user_id
     WHERE us.study_id = #{study_id}
   </select>
+  
+      <!-- 모든 유저 조회 -->
+    <select id="selectAllUsers" resultType="com.ureca.user.dto.User">
+        SELECT user_id, name, email, class_id, profile_picture
+        FROM User
+    </select>
+  
 </mapper>
