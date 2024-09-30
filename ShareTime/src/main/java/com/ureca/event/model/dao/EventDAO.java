@@ -18,4 +18,8 @@ public interface EventDAO {
 	public Event select(int id) throws SQLException; //One Event select
 
 	public List<Event> selectAll() throws SQLException;// All Event select
+
+	public List<Event> selectAllEventByClassId(int class_id);
+
+	public List<Event> selectAllEventByStudyList(List<String> stringList);
 }

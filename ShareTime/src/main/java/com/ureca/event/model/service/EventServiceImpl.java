@@ -3,6 +3,7 @@ package com.ureca.event.model.service;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.event.dto.Event;
 import com.ureca.event.model.dao.EventDAO;
+
+import io.jsonwebtoken.lang.Objects;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -102,6 +105,44 @@ public class EventServiceImpl implements EventService {
         }
         return events;
     }
+	
+	@Override
+	public List<Event> selectAllEventByClassId(int class_id){
+		List<Event> classEvents = eventDAO.selectAllEventByClassId(class_id);
+		// 각 이벤트의 문자열 데이터를 배열로 변환
+        for (Event event : classEvents) {
+            // groupType 문자열을 List로 변환
+            event.setGroup_type(convertStringToList(event.getGroupTypeString()));
+
+            // classId 문자열을 int List로 변환
+            event.setClass_id(convertStringToIntegerList(event.getClassIdString()));
+
+            // studyId 문자열을 int List로 변환
+            event.setStudy_id(convertStringToIntegerList(event.getStudyIdString()));
+        }
+		return classEvents;
+	}
+	
+	@Override
+	public List<Event> selectAllEventByStudyList(List<Map<String, Object>> studyList) {
+	    List<String> stringList = studyList.stream()
+	        .map(map -> String.valueOf((Integer) map.get("study_id"))) // Integer를 String으로 변환
+	        .collect(Collectors.toList());
+	    List<Event> studyEvents = eventDAO.selectAllEventByStudyList(stringList);
+	 // 각 이벤트의 문자열 데이터를 배열로 변환
+        for (Event event : studyEvents) {
+            // groupType 문자열을 List로 변환
+            event.setGroup_type(convertStringToList(event.getGroupTypeString()));
+
+            // classId 문자열을 int List로 변환
+            event.setClass_id(convertStringToIntegerList(event.getClassIdString()));
+
+            // studyId 문자열을 int List로 변환
+            event.setStudy_id(convertStringToIntegerList(event.getStudyIdString()));
+        }
+        return studyEvents;
+	}
+	
 	
 	// 문자열 리스트 변환 메소드
 	private List<String> convertStringToList(String csv) {

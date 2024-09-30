@@ -2,6 +2,7 @@ package com.ureca.event.model.service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import com.ureca.event.dto.Event;
 
@@ -15,4 +16,8 @@ public interface EventService {
 	public Event select(int id) throws SQLException; //One Event select
 
 	public List<Event> selectAll() throws SQLException;// All Event select
+
+	List<Event> selectAllEventByClassId(int class_id);
+
+	List<Event> selectAllEventByStudyList(List<Map<String, Object>> studyList);
 }
