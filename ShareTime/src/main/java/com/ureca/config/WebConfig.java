@@ -22,6 +22,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 실제 파일 경로와 URL 경로를 매핑
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:/Users/HYERYEONG/git/ShareTime-BE/ShareTime/uploads/");
+                .addResourceLocations(
+                		"file:/Users/HYERYEONG/git/ShareTime-BE/ShareTime/uploads/",
+                		"file:/Users/sim-yeoeun/Documents/GitHub/ShareTime-BE/ShareTime/uploads/"
+                );
     }
 }
