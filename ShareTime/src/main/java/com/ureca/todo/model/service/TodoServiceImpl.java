@@ -45,6 +45,7 @@ public class TodoServiceImpl implements TodoService {
                 existingTodo.setTitle(todo.getTitle());
                 existingTodo.setDescription(todo.getDescription());
                 existingTodo.setIs_completed(todo.getIs_completed());
+                existingTodo.setCreated_at(todo.getCreated_at());
                 System.out.println("===========> existingTodo:" + existingTodo);
                 int rowsUpdated = todoDAO.update(existingTodo);
                 if (rowsUpdated > 0) {

@@ -50,8 +50,20 @@ public class EventController {
 
     // 새로운 Event 생성
     @PostMapping("/events")
-    public ResponseEntity<Event> createEvent(@RequestBody Event event) throws SQLException {
+    public ResponseEntity<?> createEvent(@RequestBody Event event, @RequestHeader("Authorization") String token) throws SQLException {
         System.out.println("POST /events");
+     // JWT 토큰에서 user_id 추출
+        String extractedToken = token.replace("Bearer ", "");
+        Integer user_id;
+        try {
+            user_id = jwtUtil.extractUserId(extractedToken);
+            if (user_id == null) {
+                return ResponseEntity.status(401).body("Unauthorized: Invalid token.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
+        }
+        
         Event newEvent = new Event();
         newEvent.setTitle(event.getTitle());
         newEvent.setDescription(event.getDescription());
@@ -60,7 +72,7 @@ public class EventController {
         newEvent.setGroup_type(event.getGroup_type());
         newEvent.setClass_id(event.getClass_id());
         newEvent.setStudy_id(event.getStudy_id());
-        newEvent.setCreator_id(event.getCreator_id());
+        newEvent.setCreator_id(user_id);
         Event createdEvent = eventService.insert(newEvent);
         if (createdEvent != null) {
         	System.out.println("Event created");

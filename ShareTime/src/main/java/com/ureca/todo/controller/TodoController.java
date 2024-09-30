@@ -57,6 +57,7 @@ public class TodoController {
         newTodo.setTitle(todo.getTitle());
         newTodo.setDescription(todo.getDescription());
         newTodo.setUser_id(user_id);
+        newTodo.setCreated_at(todo.getCreated_at());
 
         Todo createdTodo = todoService.insert(newTodo);
         if (createdTodo != null) {

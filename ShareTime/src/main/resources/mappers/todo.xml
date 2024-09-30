@@ -16,8 +16,8 @@
 </resultMap>
 
 <insert id="insert" parameterType="com.ureca.todo.dto.Todo" useGeneratedKeys="true" keyProperty="todo_id">
-    INSERT INTO TODO (title, description, user_id)
-    VALUES (#{title}, #{description}, #{user_id})
+    INSERT INTO TODO (title, description, user_id, created_at)
+    VALUES (#{title}, #{description}, #{user_id}, #{created_at})
 </insert>
 
 <select id="findById" parameterType="int" resultMap="TodoResultMap">
